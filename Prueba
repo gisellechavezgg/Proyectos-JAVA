@@ -1,0 +1,6 @@
+public class Calculadora {
+// Crear un método que reciba dos números enteros y devuelva su suma (Creado con IA)
+    public int sumar(int a, int b) {
+        return a + b;
+    }
+}
