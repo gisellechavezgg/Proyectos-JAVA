@@ -1,0 +1,15 @@
+1. ¿Cuál es la diferencia entre extends Thread e implements Runnable? ¿Cuándo preferirías uno sobre el otro?
+Básicamente, si usas extends Thread quemas tu única oportunidad de herencia, porque Java no permite herencia múltiple. Por ejemplo, si nuestra 
+clase ya hereda de Personaje, ya no podríamos heredar de Thread. En cambio, con implements Runnable solo defines la "tarea" que se va a ejecutar, 
+dejando libre la herencia. Siempre es mejor usar Runnable porque es más flexible y es lo que más se usa en proyectos reales para manejar hilos.
+
+2. ¿Qué es una race condition? Explica con el ejemplo del ContadorCompartido por qué el resultado sin synchronized puede ser menor a 5000.
+Una race condition pasa cuando varios hilos intentan leer y modificar una misma variable al mismo tiempo y se terminan sobreescribiendo los 
+datos. En el ejemplo del contador, la instrucción contador++ no es un solo paso, sino tres: leer el valor, sumarle 1, y guardarlo. Si dos hilos 
+leen el contador al mismo tiempo (digamos 1000), los dos le suman 1 y los dos guardan 1001. Ahí ya se perdió una suma. Por eso al final casi 
+siempre da menos de 5000. Usar synchronized arregla esto obligando a los hilos a hacer fila para modificar la variable.
+
+3. ¿Para qué sirve join()? ¿Qué pasaría si quitaras los join() del bloque 3 antes de llamar tabla.mostrarResultados()?
+El método join() le dice al hilo principal (el del main) que se ponga en pausa y espere a que los demás hilos terminen su trabajo. Si quitamos 
+los join() antes de imprimir los resultados, el programa se seguiría de largo y mostraría la tabla inmediatamente. Como los combates siguen 
+corriendo en segundo plano y toman tiempo, la tabla se imprimiría vacía o incompleta.
