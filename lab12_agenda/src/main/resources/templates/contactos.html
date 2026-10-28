@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda de Contactos</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #1a1a2e;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px;
+        }
+
+        .contenedor {
+            max-width: 1000px;
+            margin: auto;
+            background: #16213e;
+            padding: 30px;
+            border-radius: 12px;
+            border: 1px solid #4a90d9;
+        }
+
+        h1 {
+            color: #f0c040;
+            text-align: center;
+        }
+
+        .nuevo {
+            display: inline-block;
+            background: #4a90d9;
+            color: white;
+            padding: 10px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            margin-bottom: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #4a90d9;
+        }
+
+        th {
+            background: #0f3460;
+            color: #f0c040;
+        }
+
+        .vacio {
+            text-align: center;
+            padding: 20px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div class="contenedor">
+        <h1>Agenda de Contactos</h1>
+
+        <a class="nuevo" href="/nuevo">+ Nuevo contacto</a>
+
+        <p class="vacio" th:if="${#lists.isEmpty(contactos)}">
+            No hay contactos registrados.
+        </p>
+
+        <table th:unless="${#lists.isEmpty(contactos)}">
+            <thead>
+                <tr>
+                    <th>Nombre</th>
+                    <th>Apellido</th>
+                    <th>Email</th>
+                    <th>Teléfono</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                <tr th:each="c : ${contactos}">
+                <td th:text="${c.nombre}">-</td>
+                <td th:text="${c.apellido}">-</td>
+                <td th:text="${c.email}">-</td>
+                <td th:text="${c.telefono}">-</td>
+                <td>
+                    <a th:href="@{/editar/{id}(id=${c.id})}">Editar</a>
+                    <a th:href="@{/eliminar/{id}(id=${c.id})}"
+                    onclick="return confirm('¿Eliminar este contacto?')">
+                        Eliminar
+                    </a>
+                </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
