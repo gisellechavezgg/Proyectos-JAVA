@@ -1,0 +1,14 @@
+1. ¿Cuál es la diferencia entre sobreescritura y sobrecarga?
+La sobreescritura (@Override) ocurre cuando una clase hija implementa nuevamente un método heredado de su clase padre.
+La sobrecarga (overload) ocurre cuando existen varios métodos con el mismo nombre, pero con diferentes parámetros.
+
+2. Si tienes Personaje p = new Mago(...) y llamas p.calcularDanio(), ¿Java usa el método de Personaje o el de Mago?
+Java ejecuta el método de Mago porque el objeto real es de tipo Mago y esta clase sobrescribe calcularDanio(). Esto sucede por
+el despacho dinámico de métodos, que selecciona la implementación según el tipo real del objeto durante la ejecución.
+
+3. ¿Para qué sirve instanceof? ¿En qué situaciones lo usarías en un sistema real?
+instanceof permite comprobar si un objeto pertenece a una clase o implementa una interfaz. En este laboratorio lo usamos para identificar 
+si cada personaje es un Guerrero, Mago o Arquero.
+
+En un sistema real podría utilizarse cuando ciertos objetos necesitan un tratamiento específico según su tipo. Sin embargo, es preferible 
+aprovechar el polimorfismo cuando todos pueden realizar la misma operación mediante un método común.
