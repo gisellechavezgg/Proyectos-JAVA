@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafetería FCFM</title>
+    <!-- Librería para alertas animadas -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        :root { --primary: #ff007f; --bg: #121212; --text: #ffffff; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: var(--bg); color: var(--text); padding: 20px; text-align: center; }
+        
+        /* Estilos del formulario de captura */
+        .form-container { background: #1e1e1e; max-width: 800px; margin: 0 auto 30px auto; padding: 25px; border-radius: 15px; box-shadow: 0 0 15px rgba(255,0,127,0.1); border-top: 4px solid var(--primary); display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; align-items: center; }
+        .form-container input { background: #2a2a2a; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; outline: none; flex: 1; min-width: 150px; }
+        .form-container input:focus { border-color: var(--primary); }
+        
+        .monitor { display: flex; justify-content: space-around; gap: 15px; }
+        .columna { background: #1e1e1e; padding: 20px; border-radius: 15px; width: 30%; min-height: 400px; box-shadow: 0 0 15px rgba(255,0,127,0.1); }
+        h2 { color: var(--primary); font-size: 1.5rem; margin-top: 0; }
+        .pedido-card { background: #2a2a2a; margin: 15px 0; padding: 15px; border-radius: 10px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; border-left: 5px solid var(--primary); text-align: left; animation: popIn 0.4s ease-out; }
+        .pedido-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,0,127,0.3); }
+        .detalles { font-size: 0.9rem; color: #aaa; margin-top: 8px; background: #222; padding: 8px; border-radius: 5px; }
+        button { background: var(--primary); color: white; border: none; padding: 12px 25px; border-radius: 8px; cursor: pointer; font-weight: bold; transition: transform 0.2s; white-space: nowrap; }
+        button:hover { transform: scale(1.05); }
+
+        @keyframes popIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+    <h1>☕ Cafetería FCFM - Monitor en Tiempo Real</h1>
+    
+    <!-- Nuevo Panel para registrar pedidos reales -->
+    <div class="form-container">
+        <input type="text" id="clienteIn" placeholder="Cliente (ej. Giselle)">
+        <select id="productoIn" style="background: #2a2a2a; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; outline: none; flex: 1; min-width: 150px; cursor: pointer;">
+            <option value="" disabled selected>✨ Selecciona el producto...</option>
+            <option value="Café Americano">☕ Café Americano</option>
+            <option value="Latte de Avena">🥛 Latte de Avena</option>
+            <option value="Frappé Mocha">🧊 Frappé Mocha</option>
+            <option value="Matcha Frío">🍵 Matcha Frío</option>
+            <option value="Galleta Chispas">🍪 Galleta Chispas</option>
+        </select>
+        <input type="text" id="modificadorIn" placeholder="Modificador (ej. Leche de avena)">
+        <input type="number" id="precioIn" placeholder="Precio ($)">
+        <button onclick="enviarPedidoReal()">+ Crear Pedido</button>
+    </div>
+    
+    <div class="monitor">
+        <div class="columna" id="col-Recibido"><h2>📥 Recibidos</h2></div>
+        <div class="columna" id="col-Preparando"><h2>☕ Preparando</h2></div>
+        <div class="columna" id="col-Listo"><h2>🛼 Listos para Entrega</h2></div>
+    </div>
+
+    <script>
+        // Cargar los pedidos desde la base de datos
+        async function cargarPedidos() {
+            const res = await fetch('/api/pedidos');
+            const pedidos = await res.json();
+            
+            document.getElementById('col-Recibido').innerHTML = '<h2>📥 Recibidos</h2>';
+            document.getElementById('col-Preparando').innerHTML = '<h2>☕ Preparando</h2>';
+            document.getElementById('col-Listo').innerHTML = '<h2>🛼 Listos para Entrega</h2>';
+
+            pedidos.forEach(p => {
+                const div = document.createElement('div');
+                div.className = 'pedido-card';
+                
+                let itemsHtml = p.items.map(i => `✨ ${i.producto} <br><small><i>(${i.modificador})</i></small>`).join('<br><br>');
+                
+                div.innerHTML = `
+                    <strong>${p.cliente}</strong> <span style="float:right; color: #ff007f; font-weight: bold;">$${p.total}</span>
+                    <div class="detalles">${itemsHtml}</div>
+                `;
+                
+                // Al hacer clic, avanza de estado
+                div.onclick = () => avanzarEstado(p.id, p.estado);
+                document.getElementById(`col-${p.estado}`).appendChild(div);
+            });
+        }
+
+        // Avanzar el pedido a la siguiente columna o entregarlo (borrarlo)
+        async function avanzarEstado(id, estadoActual) {
+            // Si ya está listo, al hacer clic lo entregamos y borramos
+            if(estadoActual === 'Listo') {
+                Swal.fire({
+                    title: '¿Entregar pedido?',
+                    text: "El pedido se eliminará de la base de datos.",
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#ff007f',
+                    cancelButtonColor: '#444',
+                    confirmButtonText: 'Sí, se entregará al cliente 🛼'
+                }).then(async (result) => {
+                    if (result.isConfirmed) {
+                        // Llamamos al DELETE de tu API
+                        await fetch(`/api/pedidos/${id}`, { method: 'DELETE' });
+                        Swal.fire({
+                            title: '¡Entregado!',
+                            icon: 'success',
+                            background: '#1e1e1e',
+                            color: '#fff',
+                            timer: 1200,
+                            showConfirmButton: false
+                        });
+                        cargarPedidos(); // Recargamos la pantalla
+                    }
+                });
+                return;
+            }
+
+            // Si no está listo, solo avanza de estado con el PUT
+            await fetch(`/api/pedidos/${id}/estado`, { method: 'PUT' });
+            
+            Swal.fire({
+                title: '¡Avanzando!',
+                text: 'El pedido pasó a la siguiente estación',
+                icon: 'success',
+                timer: 1000,
+                showConfirmButton: false,
+                background: '#1e1e1e',
+                color: '#fff'
+            });
+            cargarPedidos();
+        }
+
+        // Capturar los datos del formulario y enviarlos a la API
+        async function enviarPedidoReal() {
+            const cliente = document.getElementById('clienteIn').value;
+            const producto = document.getElementById('productoIn').value;
+            const modificador = document.getElementById('modificadorIn').value;
+            const precio = parseFloat(document.getElementById('precioIn').value);
+
+            // Validación para que no manden cosas vacías
+            if(!cliente || !producto || isNaN(precio)) {
+                Swal.fire({
+                    title: 'Faltan datos',
+                    text: 'Por favor llena el cliente, producto y precio.',
+                    icon: 'warning',
+                    background: '#1e1e1e',
+                    color: '#fff'
+                });
+                return;
+            }
+
+            // Construimos el objeto respetando la Composición de Java
+            const nuevoPedido = {
+                cliente: cliente,
+                total: precio,
+                items: [
+                    { 
+                        producto: producto, 
+                        modificador: modificador || "Sin modificaciones", 
+                        subtotal: precio 
+                    }
+                ]
+            };
+
+            // Mandamos el POST a tu API
+            await fetch('/api/pedidos', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(nuevoPedido)
+            });
+
+            // Limpiamos las cajas de texto
+            document.getElementById('clienteIn').value = '';
+            document.getElementById('productoIn').value = '';
+            document.getElementById('modificadorIn').value = '';
+            document.getElementById('precioIn').value = '';
+
+            // Notificación de éxito
+            Swal.fire({
+                title: '¡Pedido Registrado!',
+                icon: 'success',
+                timer: 1200,
+                showConfirmButton: false,
+                background: '#1e1e1e',
+                color: '#fff'
+            });
+
+            // Recargamos el tablero
+            cargarPedidos();
+        }
+
+        // Iniciar la carga al abrir la página
+        cargarPedidos();
+    </script>
+</body>
+</html>
