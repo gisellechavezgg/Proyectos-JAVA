@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Compañía de Folclor</title>
+    <style>
+        body  { font-family: Arial, sans-serif; background: #2c1a1a;
+                color: #e0e0e0; padding: 40px; }
+        h1    { color: #f0c040; }
+        a.btn { display: inline-block; padding: 10px 20px; background: #d94a4a;
+                color: white; border-radius: 6px; text-decoration: none;
+                margin-bottom: 20px; font-weight: bold; }
+        table { width: 100%; border-collapse: collapse; }
+        th    { background: #600f0f; color: #f0c040; padding: 12px; text-align: left; }
+        td    { padding: 10px; border-bottom: 1px solid #4a2020; }
+        tr:hover { background: #3e1616; }
+        a.editar   { color: #f0c040; text-decoration: none; margin-right: 12px; }
+        a.eliminar { color: #e05252; text-decoration: none; }
+        .vacio { color: #aaa; font-style: italic; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>🇲🇽 Compañía de Folclor - Registro de Danzantes</h1>
+    <a class="btn" href="/nuevo">+ Registrar Danzante</a>
+
+    <div th:if="${#lists.isEmpty(danzantes)}" class="vacio">
+        No hay danzantes registrados aún. Prepara el vestuario y agrega al primero.
+    </div>
+
+    <table th:unless="${#lists.isEmpty(danzantes)}">
+        <tr>
+            <th>Nombre</th>
+            <th>Estado (Repertorio)</th>
+            <th>Agrupación</th>
+            <th>Calzado Requerido</th>
+            <th>Acciones</th>
+        </tr>
+        <tr th:each="d : ${danzantes}">
+            <td th:text="${d.nombre}">-</td>
+            <td th:text="${d.estado}">-</td>
+            <td th:text="${d.agrupacion}">-</td>
+            <td th:text="${d.calzado}">-</td>
+            <td>
+                <a class="editar"   th:href="@{/editar/{id}(id=${d.id})}">Editar</a>
+                <a class="eliminar" th:href="@{/eliminar/{id}(id=${d.id})}"
+                   onclick="return confirm('¿Dar de baja a este danzante?')">Eliminar</a>
+            </td>
+        </tr>
+    </table>
+</body>
+</html>

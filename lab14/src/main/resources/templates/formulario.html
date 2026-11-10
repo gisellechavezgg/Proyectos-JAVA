@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Registro de Danzante</title>
+    <style>
+        body  { font-family: Arial, sans-serif; background: #2c1a1a;
+                color: #e0e0e0; display: flex; justify-content: center;
+                margin-top: 60px; }
+        .caja { background: #3e1616; padding: 40px; border-radius: 12px;
+                border: 1px solid #d94a4a; width: 380px; }
+        h1    { color: #f0c040; text-align: center; margin-bottom: 24px; }
+        label { display: block; margin-bottom: 4px; color: #aaa; font-size: .9em; }
+        input { width: 100%; padding: 10px; margin-bottom: 16px;
+                background: #600f0f; border: 1px solid #d94a4a;
+                border-radius: 6px; color: #fff; box-sizing: border-box; }
+        button { width: 100%; padding: 12px; background: #d94a4a;
+                 border: none; border-radius: 6px; color: white;
+                 font-size: 1em; cursor: pointer; font-weight: bold; }
+        a     { display: block; text-align: center; margin-top: 16px; color: #d94a4a; }
+    </style>
+</head>
+<body>
+    <div class="caja">
+        <h1 th:text="${danzante.id} != null ? '✏️ Editar Danzante' : '💃 Nuevo Danzante'">
+            Danzante
+        </h1>
+
+        <form th:action="${danzante.id} != null ? @{/actualizar} : @{/guardar}"
+              th:object="${danzante}"
+              method="post">
+
+            <input type="hidden" th:field="*{id}" />
+
+            <label>Nombre</label>
+            <input type="text" th:field="*{nombre}" placeholder="Nombre completo" required />
+
+            <label>Estado Representativo (Repertorio)</label>
+            <input type="text" th:field="*{estado}" placeholder="Ej. Nuevo León, Jalisco..." required />
+
+            <label>Agrupación o Compañía</label>
+            <input type="text" th:field="*{agrupacion}" placeholder="Nombre del grupo" required />
+
+            <label>Tipo de Calzado</label>
+            <input type="text" th:field="*{calzado}" placeholder="Ej. Botín negro de piel, Zapato blanco" required />
+
+            <button type="submit">💾 Guardar Registro</button>
+        </form>
+        <a href="/danzantes">← Cancelar</a>
+    </div>
+</body>
+</html>

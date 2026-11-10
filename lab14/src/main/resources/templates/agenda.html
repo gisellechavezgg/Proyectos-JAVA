@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Agenda de Presentaciones</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<div class="container-fluid mt-5 px-4">
+    <h2 class="text-center mb-4">Agenda del Grupo Folklórico</h2>
+
+    <div class="row">
+        <!-- FORMULARIO -->
+        <div class="col-md-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0" th:text="${nuevoEvento.id == null ? 'Nueva Presentación' : 'Editar Presentación'}"></h5>
+                </div>
+                <div class="card-body">
+                    <form th:action="@{/agenda/guardar}" th:object="${nuevoEvento}" method="post">
+                        
+                        <!-- CLAVE PARA EDITAR: Campo oculto con el ID -->
+                        <input type="hidden" th:field="*{id}">
+
+                        <div class="mb-3">
+                            <label class="form-label">Título del Evento:</label>
+                            <input type="text" class="form-control" th:field="*{titulo}" required placeholder="Ej. Presentación Día de Muertos">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fecha:</label>
+                            <!-- MAGIA AQUÍ: th:min bloquea las fechas antes de hoy -->
+                            <input type="date" class="form-control" th:field="*{fecha}" 
+                                   th:min="${#temporals.format(#temporals.createNow(), 'yyyy-MM-dd')}" required>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Lugar:</label>
+                            <input type="text" class="form-control" th:field="*{lugar}" required placeholder="Ej. Teatro Universitario">
+                        </div>
+
+                        <!-- NUEVO CAMPO: Descripción -->
+                        <div class="mb-3">
+                            <label class="form-label">Descripción (Hora, Región, Detalles):</label>
+                            <textarea class="form-control" th:field="*{descripcion}" rows="3" placeholder="Ej. 18:00 hrs. Región Norteña. Llevar falda doble circular."></textarea>
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100" th:text="${nuevoEvento.id == null ? 'Guardar en Agenda' : 'Actualizar Evento'}"></button>
+                        
+                        <!-- Botón para cancelar edición si el usuario se arrepiente -->
+                        <a th:if="${nuevoEvento.id != null}" th:href="@{/agenda}" class="btn btn-secondary w-100 mt-2">Cancelar Edición</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- TABLA -->
+        <div class="col-md-8">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Fecha</th>
+                                <th>Evento</th>
+                                <th>Lugar</th>
+                                <th>Descripción</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="evento : ${eventos}">
+                                <td th:text="${#temporals.format(evento.fecha, 'dd/MM/yyyy')}"></td>
+                                <td th:text="${evento.titulo}"></td>
+                                <td th:text="${evento.lugar}"></td>
+                                <td th:text="${evento.descripcion}"></td>
+                                <td>
+                                    <!-- NUEVO BOTÓN: Editar -->
+                                    <a th:href="@{/agenda/editar/{id}(id=${evento.id})}" class="btn btn-warning btn-sm mb-1">Editar</a>
+                                    
+                                    <a th:href="@{/agenda/eliminar/{id}(id=${evento.id})}" 
+                                       class="btn btn-danger btn-sm mb-1"
+                                       onclick="return confirm('¿Seguro que quieres borrar esta fecha?');">
+                                        Eliminar
+                                    </a>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(eventos)}">
+                                <td colspan="5" class="text-center text-muted">No hay eventos en la agenda todavía.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
